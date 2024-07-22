@@ -23,6 +23,7 @@
         <module>inventory-service</module>
         <module>discovery-server</module>
         <module>api-gateway</module>
+        <module>notification-service</module>
     </modules>
 
     <properties>
@@ -47,7 +48,7 @@
             <plugin>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
-<!--                <version>${parent.version}</version>-->
+<!--                <version>${project.parent.version}</version>-->
                 <configuration>
                     <excludes>
                         <exclude>
