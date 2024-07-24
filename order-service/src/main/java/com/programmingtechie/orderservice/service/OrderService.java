@@ -8,7 +8,7 @@ import com.programmingtechie.orderservice.dto.OrderLineItemsDto;
 import com.programmingtechie.orderservice.dto.OrderRequest;
 import com.programmingtechie.orderservice.event.OrderPlacedEvent;
 import com.programmingtechie.orderservice.model.Order;
-import com.programmingtechie.orderservice.model.OrderItems;
+import com.programmingtechie.orderservice.model.OrderDetail;
 import com.programmingtechie.orderservice.repository.OrderRepository;
 import io.micrometer.tracing.Tracer;
 import lombok.RequiredArgsConstructor;
@@ -51,7 +51,7 @@ public class OrderService {
         Order order = new Order();
         order.setOrderNumber(UUID.randomUUID().toString());
 
-        List<OrderItems> orderLineItems = orderRequest.getOrderLineItemsDtos()
+        List<OrderDetail> orderLineItems = orderRequest.getOrderLineItemsDtos()
                 .stream()
                 .map(order1 -> mapToDto(order1))
                 .toList();
@@ -59,7 +59,7 @@ public class OrderService {
         order.setOrderLineItemsList(orderLineItems);
 
         List<String> listSkuCode = order.getOrderLineItemsList().stream()
-                .map(OrderItems::getSkuCode)
+                .map(OrderDetail::getSkuCode)
                 .toList();
 
         InventoryResponse[] result = webClient.build()
@@ -113,8 +113,8 @@ public class OrderService {
         return new ProducerRecord<>(topic, null, key, value, recordHeaders);
     }
 
-    private OrderItems mapToDto(OrderLineItemsDto orderLineItemsDto) {
-        OrderItems orderLineItems = new OrderItems();
+    private OrderDetail mapToDto(OrderLineItemsDto orderLineItemsDto) {
+        OrderDetail orderLineItems = new OrderDetail();
         orderLineItems.setPrice(orderLineItemsDto.getPrice());
         orderLineItems.setQuantity(orderLineItemsDto.getQuantity());
         orderLineItems.setSkuCode(orderLineItemsDto.getSkuCode());

@@ -21,18 +21,22 @@ public class Order {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
+    private Integer customerId;
+
     private String orderNumber;
 
     private Integer totalPayment;
 
-    private LocalDateTime orderDate;
+    private LocalDateTime createDate;
 
-    private LocalDateTime shipDate;
+    private LocalDateTime dateShip;
 
-    private String shipAddress;
+    private String addressShip;
 
     private String statusPayment;
 
+    private Integer shipperId;
+
     @OneToMany(cascade = CascadeType.ALL)
-    private List<OrderItems> orderLineItemsList;
+    private List<OrderDetail> orderLineItemsList;
 }
