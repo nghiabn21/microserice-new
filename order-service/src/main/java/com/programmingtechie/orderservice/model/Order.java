@@ -6,6 +6,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import jakarta.persistence.*;
+
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Entity
@@ -18,7 +20,19 @@ public class Order {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
+
     private String orderNumber;
+
+    private Integer totalPayment;
+
+    private LocalDateTime orderDate;
+
+    private LocalDateTime shipDate;
+
+    private String shipAddress;
+
+    private String statusPayment;
+
     @OneToMany(cascade = CascadeType.ALL)
-    private List<OrderLineItems> orderLineItemsList;
+    private List<OrderItems> orderLineItemsList;
 }

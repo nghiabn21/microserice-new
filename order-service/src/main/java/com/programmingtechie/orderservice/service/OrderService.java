@@ -8,9 +8,8 @@ import com.programmingtechie.orderservice.dto.OrderLineItemsDto;
 import com.programmingtechie.orderservice.dto.OrderRequest;
 import com.programmingtechie.orderservice.event.OrderPlacedEvent;
 import com.programmingtechie.orderservice.model.Order;
-import com.programmingtechie.orderservice.model.OrderLineItems;
+import com.programmingtechie.orderservice.model.OrderItems;
 import com.programmingtechie.orderservice.repository.OrderRepository;
-import io.micrometer.tracing.Span;
 import io.micrometer.tracing.Tracer;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -52,7 +51,7 @@ public class OrderService {
         Order order = new Order();
         order.setOrderNumber(UUID.randomUUID().toString());
 
-        List<OrderLineItems> orderLineItems = orderRequest.getOrderLineItemsDtos()
+        List<OrderItems> orderLineItems = orderRequest.getOrderLineItemsDtos()
                 .stream()
                 .map(order1 -> mapToDto(order1))
                 .toList();
@@ -60,7 +59,7 @@ public class OrderService {
         order.setOrderLineItemsList(orderLineItems);
 
         List<String> listSkuCode = order.getOrderLineItemsList().stream()
-                .map(OrderLineItems::getSkuCode)
+                .map(OrderItems::getSkuCode)
                 .toList();
 
         InventoryResponse[] result = webClient.build()
@@ -114,57 +113,57 @@ public class OrderService {
         return new ProducerRecord<>(topic, null, key, value, recordHeaders);
     }
 
-    private OrderLineItems mapToDto(OrderLineItemsDto orderLineItemsDto) {
-        OrderLineItems orderLineItems = new OrderLineItems();
+    private OrderItems mapToDto(OrderLineItemsDto orderLineItemsDto) {
+        OrderItems orderLineItems = new OrderItems();
         orderLineItems.setPrice(orderLineItemsDto.getPrice());
         orderLineItems.setQuantity(orderLineItemsDto.getQuantity());
         orderLineItems.setSkuCode(orderLineItemsDto.getSkuCode());
         return orderLineItems;
     }
 
-    public String placeOrderDisplayZipkin(OrderRequest orderRequest) {
-        Order order = new Order();
-        order.setOrderNumber(UUID.randomUUID().toString());
-
-        List<OrderLineItems> orderLineItems = orderRequest.getOrderLineItemsDtos()
-                .stream()
-                .map(order1 -> mapToDto(order1))
-                .toList();
-
-        order.setOrderLineItemsList(orderLineItems);
-
-        List<String> listSkuCode = order.getOrderLineItemsList().stream()
-                .map(OrderLineItems::getSkuCode)
-                .toList();
-
-        //Code test display in zipkin
-        Span span = tracer.nextSpan().name("InventoryServiceLookUp: ");
-        try (Tracer.SpanInScope spanInScope = tracer.withSpan(span.start())) {
-            // Call Inventory Service, and place order if product is in
-            // stock
-            InventoryResponse[] result = webClient.build()
-                    .get()
-                    .uri("http://inventory-service/api/inventory",
-                            uriBuilder -> uriBuilder.queryParam("skuCode", listSkuCode).build())
-                    .retrieve()
-                    .bodyToMono(InventoryResponse[].class)
-                    .block(); // block: tạo yêu cầu đồng bộ
-
-            boolean allProductInStock = Arrays.stream(result).allMatch(InventoryResponse::isInStock);
-
-            // nếu tất cả sản phẩm có trong kho thì lưu cái order vào
-            if (allProductInStock) {
-                orderRepository.save(order);
-
-//                kafkaTemplate.send(topic, new OrderPlacedEvent(order.getOrderNumber()));
-
-                return "Order Successfully";
-            } else {
-                throw new IllegalArgumentException("Product is not in stock, please try again later");
-            }
-        } finally {
-            span.end();
-        }
-
-    }
+//    public String placeOrderDisplayZipkin(OrderRequest orderRequest) {
+//        Order order = new Order();
+//        order.setOrderNumber(UUID.randomUUID().toString());
+//
+//        List<OrderLineItems> orderLineItems = orderRequest.getOrderLineItemsDtos()
+//                .stream()
+//                .map(order1 -> mapToDto(order1))
+//                .toList();
+//
+//        order.setOrderLineItemsList(orderLineItems);
+//
+//        List<String> listSkuCode = order.getOrderLineItemsList().stream()
+//                .map(OrderLineItems::getSkuCode)
+//                .toList();
+//
+//        //Code test display in zipkin
+//        Span span = tracer.nextSpan().name("InventoryServiceLookUp: ");
+//        try (Tracer.SpanInScope spanInScope = tracer.withSpan(span.start())) {
+//            // Call Inventory Service, and place order if product is in
+//            // stock
+//            InventoryResponse[] result = webClient.build()
+//                    .get()
+//                    .uri("http://inventory-service/api/inventory",
+//                            uriBuilder -> uriBuilder.queryParam("skuCode", listSkuCode).build())
+//                    .retrieve()
+//                    .bodyToMono(InventoryResponse[].class)
+//                    .block(); // block: tạo yêu cầu đồng bộ
+//
+//            boolean allProductInStock = Arrays.stream(result).allMatch(InventoryResponse::isInStock);
+//
+//            // nếu tất cả sản phẩm có trong kho thì lưu cái order vào
+//            if (allProductInStock) {
+//                orderRepository.save(order);
+//
+////                kafkaTemplate.send(topic, new OrderPlacedEvent(order.getOrderNumber()));
+//
+//                return "Order Successfully";
+//            } else {
+//                throw new IllegalArgumentException("Product is not in stock, please try again later");
+//            }
+//        } finally {
+//            span.end();
+//        }
+//
+//    }
 }
