@@ -1,4 +1,4 @@
-package com.programming.techie.apigateway;
+package com.programming.techie.apigateway.config;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

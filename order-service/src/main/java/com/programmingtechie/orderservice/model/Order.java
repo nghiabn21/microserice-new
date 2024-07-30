@@ -21,22 +21,29 @@ public class Order {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
+    // liên kết bảng user -> ai đặt hàng
     private Integer customerId;
-
+    // mã đơn hàng
     private String orderNumber;
-
+    // tổnsosotieenf trả
     private Integer totalPayment;
 
+    // ngàytaojo đơn
     private LocalDateTime createDate;
 
+    // ngày du tinh ship
     private LocalDateTime dateShip;
 
+    // dia chi ship
     private String addressShip;
 
+    // trang thai than toán
     private String statusPayment;
 
+    // ai ship
     private Integer shipperId;
 
+    // nhieuf món hàng
     @OneToMany(cascade = CascadeType.ALL)
     private List<OrderDetail> orderLineItemsList;
 }

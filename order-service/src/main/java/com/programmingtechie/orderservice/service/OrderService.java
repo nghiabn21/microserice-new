@@ -58,8 +58,8 @@ public class OrderService {
 
         order.setOrderLineItemsList(orderLineItems);
 
-        List<String> listSkuCode = order.getOrderLineItemsList().stream()
-                .map(OrderDetail::getSkuCode)
+        List<Integer> listSkuCode = order.getOrderLineItemsList().stream()
+                .map(OrderDetail::getProductId)
                 .toList();
 
         InventoryResponse[] result = webClient.build()
@@ -75,13 +75,15 @@ public class OrderService {
         // nếu tất cả sản phẩm có trong kho thì lưu cái order vào
         if (allProductInStock) {
             orderRepository.save(order);
+
             log.info("Started send message to kafka");
+
             Integer key = order.getId();
-            String orderListItemId = order.getOrderLineItemsList().get(0).getSkuCode();
+//            String orderListItemId = order.getOrderLineItemsList().get(0).getSkuCode();
 
             OrderPlacedEvent orderPlacedEvent = new OrderPlacedEvent();
             orderPlacedEvent.setOrderNumber(order.getOrderNumber());
-            orderPlacedEvent.setOrderListItemId(orderListItemId);
+//            orderPlacedEvent.setProductCode();
 
             String value = objectMapper.writeValueAsString(orderPlacedEvent);
             log.info("value: {}", value);
@@ -91,16 +93,14 @@ public class OrderService {
             // gửi fail hay success thì nó sẽ in mess sau đó
             CompletableFuture<SendResult<Integer, String>> completableFuture = kafkaTemplate.send(producerRecord);
 
-            return  completableFuture.whenComplete((sendResult, throwable) -> {
-                  if(throwable != null){
-                      log.error("Error Sending the Message and the exception is {}", throwable.getMessage());
-                  }else {
-                      log.info("Message Sent SuccessFully for the key : {} and the value is {} , partition is {}",
-                              key, value, sendResult.getRecordMetadata().partition());
-                  }
+            return completableFuture.whenComplete((sendResult, throwable) -> {
+                if (throwable != null) {
+                    log.error("Error Sending the Message and the exception is {}", throwable.getMessage());
+                } else {
+                    log.info("Message Sent SuccessFully for the key : {} and the value is {} , partition is {}",
+                            key, value, sendResult.getRecordMetadata().partition());
+                }
             });
-//            kafkaTemplate.send(topic, new OrderPlacedEvent(order.getOrderNumber()));
-//            return "Order Successfully";
         } else {
             throw new IllegalArgumentException("Product is not in stock, please try again later");
         }
@@ -117,7 +117,7 @@ public class OrderService {
         OrderDetail orderLineItems = new OrderDetail();
         orderLineItems.setPrice(orderLineItemsDto.getPrice());
         orderLineItems.setQuantity(orderLineItemsDto.getQuantity());
-        orderLineItems.setSkuCode(orderLineItemsDto.getSkuCode());
+        orderLineItems.setProductId(orderLineItemsDto.getProductId());
         return orderLineItems;
     }
 

@@ -20,13 +20,13 @@ public class InventoryController {
 
     /**
      * Check xem sản phẩm còn trong kho không
-     * @param skuCode
+     * @param productId
      * @return
      */
     @GetMapping
     @ResponseStatus(HttpStatus.OK)
-    public List<InventoryResponse> isInStock(@RequestParam List<String> skuCode) {
-        log.info("Received inventory check request for skuCode: {}", skuCode);
-        return inventoryService.isInStock(skuCode);
+    public List<InventoryResponse> isInStock(@RequestParam List<Integer> productId) {
+        log.info("Received inventory check request for skuCode: {}", productId);
+        return inventoryService.isInStock(productId);
     }
 }

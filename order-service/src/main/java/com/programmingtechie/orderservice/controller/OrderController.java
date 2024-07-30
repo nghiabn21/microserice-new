@@ -31,12 +31,11 @@ public class OrderController {
         orderService.placeOrder(orderRequest);
         log.info("Sau khi truy van xong");
         return ResponseEntity.status(HttpStatus.CREATED).body("Order Successfully");
-//        return CompletableFuture.supplyAsync(() -> orderService.placeOrder(orderRequest));
     }
 
     /**
      * CompletableFuture: lập trình bất đồng bộ và xử lý đồng thời.
-     * Nó cho phép bạn tạo ra các tác vụ (tasks) và xử lý các kết quả của chúng khi chúng hoàn thành.
+     * Nó cho phép tạo ra các tác vụ (tasks) và xử lý các kết quả của chúng khi chúng hoàn thành.
      * supplyAsync: khởi tạo và thực thi một tác vụ bất đồng bộ (asynchronous task) và trả về một kết quả
      * khi chạy gọi service: sẽ được gọi và thực thi trong một luồng (thread) khác, không chặn luồng chính của ứng dụng.
      */
@@ -46,7 +45,6 @@ public class OrderController {
         orderService.placeOrder(orderRequest);
         log.info("Called to kafka and this is controller");
         return ResponseEntity.status(HttpStatus.CREATED).body("Order Successfully");
-//        return  orderService.placeOrder(orderRequest);
     }
 
 

@@ -12,7 +12,9 @@ import lombok.NoArgsConstructor;
 public class InventoryResponse {
 
     // mã code của sản phẩm
-    private String skuCode;
+//    private String skuCode;
+
+    private Integer productId;
 
     // kiểm tra còn hàng trong kho hay k
     private boolean isInStock;

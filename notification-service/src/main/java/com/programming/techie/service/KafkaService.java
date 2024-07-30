@@ -19,7 +19,7 @@ public class KafkaService {
     public void processSendTopic(ConsumerRecord<Integer, String> consumerRecord) throws JsonProcessingException {
         OrderPlacedEvent orderPlacedEvent = objectMapper.readValue(consumerRecord.value(), OrderPlacedEvent.class);
         log.info("Run in kafkaService: {}", orderPlacedEvent);
-        if(orderPlacedEvent.getOrderListItemId().equals("iphone_no")){
+        if(orderPlacedEvent.getOrderNumber() == null){
             throw new RecoverableDataAccessException("Lỗi ở service!!!");
         }
         log.info("Successfully");

@@ -18,9 +18,16 @@ public class OrderDetail {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
+
+    // id san pham nao dc dat
     private Integer productId;
-    private String skuCode;
+    // id ma san pham
+    private String productCode;
+
+    // giá
     private BigDecimal price;
+
+    // so luong muon dat
     private Integer quantity;
 
     @ManyToOne
