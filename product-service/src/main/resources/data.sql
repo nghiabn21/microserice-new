@@ -1,9 +1,9 @@
 insert into branch (name, description)
-values('APPLE');
+values('APPLE','Hãng điện thoại APPLE');
 insert into branch (name, description)
-values('SAMSUNG');
+values('SAMSUNG','Hãng điện thoại SAMSUNG');
 insert into branch (name, description)
-values('NOKIA');
+values('NOKIA','Hãng điện thoại NOKIA');
 
 insert into product (name,description,price,available_quantity,branch_id)
 values('IPHONE','IPHONE_13_PRO','19.99',10,1);

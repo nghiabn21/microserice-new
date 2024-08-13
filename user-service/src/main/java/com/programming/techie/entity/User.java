@@ -33,7 +33,8 @@ public class User {
     @Column(name = "status")
     private String status;
 
-    @OneToMany(cascade = CascadeType.ALL)
+    // nếu không có mappedBy sẽ sinh ra 1 bảng ở giữa như branch_product_list
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "user")
     private List<Address> address;
 
 }

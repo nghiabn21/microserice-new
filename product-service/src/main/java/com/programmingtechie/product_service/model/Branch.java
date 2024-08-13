@@ -24,6 +24,7 @@ public class Branch {
     private String name;
     private String description;
 
+    // nếu không có mappedBy sẽ sinh ra 1 bảng ở giữa như branch_product_list
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "branch")
     private List<Product> productList;
 }
