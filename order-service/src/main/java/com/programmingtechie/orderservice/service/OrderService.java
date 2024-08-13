@@ -8,8 +8,9 @@ import com.programmingtechie.orderservice.dto.OrderLineItemsDto;
 import com.programmingtechie.orderservice.dto.OrderRequest;
 import com.programmingtechie.orderservice.event.OrderPlacedEvent;
 import com.programmingtechie.orderservice.model.Order;
-import com.programmingtechie.orderservice.model.OrderDetail;
+import com.programmingtechie.orderservice.model.OrderLine;
 import com.programmingtechie.orderservice.repository.OrderRepository;
+import com.programmingtechie.orderservice.utils.OrderMapper;
 import io.micrometer.tracing.Tracer;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -46,12 +47,74 @@ public class OrderService {
 
     private final KafkaTemplate<Integer, String> kafkaTemplate;
 
+    private final OrderRepository repository;
+    private final OrderMapper mapper;
+    private final CustomerClient customerClient;
+    private final PaymentClient paymentClient;
+    private final ProductClient productClient;
+    private final OrderLineService orderLineService;
+    private final OrderProducer orderProducer;
+
+    @Transactional
+    public Integer createOrder(OrderRequest request) {
+        var customer = this.customerClient.findCustomerById(request.customerId())
+                .orElseThrow(() -> new BusinessException("Cannot create order:: No customer exists with the provided ID"));
+
+        var purchasedProducts = productClient.purchaseProducts(request.products());
+
+        var order = this.repository.save(mapper.toOrder(request));
+
+        for (PurchaseRequest purchaseRequest : request.products()) {
+            orderLineService.saveOrderLine(
+                    new OrderLineRequest(
+                            null,
+                            order.getId(),
+                            purchaseRequest.productId(),
+                            purchaseRequest.quantity()
+                    )
+            );
+        }
+        var paymentRequest = new PaymentRequest(
+                request.amount(),
+                request.paymentMethod(),
+                order.getId(),
+                order.getReference(),
+                customer
+        );
+        paymentClient.requestOrderPayment(paymentRequest);
+
+        orderProducer.sendOrderConfirmation(
+                new OrderConfirmation(
+                        request.reference(),
+                        request.amount(),
+                        request.paymentMethod(),
+                        customer,
+                        purchasedProducts
+                )
+        );
+
+        return order.getId();
+    }
+
+    public List<OrderResponse> findAllOrders() {
+        return this.repository.findAll()
+                .stream()
+                .map(this.mapper::fromOrder)
+                .collect(Collectors.toList());
+    }
+
+    public OrderResponse findById(Integer id) {
+        return this.repository.findById(id)
+                .map(this.mapper::fromOrder)
+                .orElseThrow(() -> new EntityNotFoundException(String.format("No order found with the provided ID: %d", id)));
+    }
+
 
     public CompletableFuture<SendResult<Integer, String>> placeOrder(OrderRequest orderRequest) throws JsonProcessingException {
         Order order = new Order();
         order.setOrderNumber(UUID.randomUUID().toString());
 
-        List<OrderDetail> orderLineItems = orderRequest.getOrderLineItemsDtos()
+        List<OrderLine> orderLineItems = orderRequest.getOrderLineItemsDtos()
                 .stream()
                 .map(order1 -> mapToDto(order1))
                 .toList();
@@ -59,7 +122,7 @@ public class OrderService {
         order.setOrderLineItemsList(orderLineItems);
 
         List<Integer> listSkuCode = order.getOrderLineItemsList().stream()
-                .map(OrderDetail::getProductId)
+                .map(OrderLine::getProductId)
                 .toList();
 
         InventoryResponse[] result = webClient.build()
@@ -113,9 +176,9 @@ public class OrderService {
         return new ProducerRecord<>(topic, null, key, value, recordHeaders);
     }
 
-    private OrderDetail mapToDto(OrderLineItemsDto orderLineItemsDto) {
-        OrderDetail orderLineItems = new OrderDetail();
-        orderLineItems.setPrice(orderLineItemsDto.getPrice());
+    private OrderLine mapToDto(OrderLineItemsDto orderLineItemsDto) {
+        OrderLine orderLineItems = new OrderLine();
+//        orderLineItems.setPrice(orderLineItemsDto.getPrice());
         orderLineItems.setQuantity(orderLineItemsDto.getQuantity());
         orderLineItems.setProductId(orderLineItemsDto.getProductId());
         return orderLineItems;

@@ -24,6 +24,7 @@ public class Product {
     private String name;
     private String description;
     private BigDecimal price;
+    private double availableQuantity;
 
     @ManyToOne
     @JoinColumn(name = "branch_id")

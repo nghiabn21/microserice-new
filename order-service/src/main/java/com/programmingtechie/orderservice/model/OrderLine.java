@@ -14,24 +14,19 @@ import java.math.BigDecimal;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-public class OrderDetail {
+public class OrderLine {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
     // id san pham nao dc dat
     private Integer productId;
-    // id ma san pham
-    private String productCode;
-
-    // giá
-    private BigDecimal price;
 
     // so luong muon dat
-    private Integer quantity;
+    private double quantity;
 
     @ManyToOne
     @JoinColumn(name = "order_id")
-    private Order order;
+    private Order orders;
 
 }

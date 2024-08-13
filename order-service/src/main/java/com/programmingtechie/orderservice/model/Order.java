@@ -6,7 +6,12 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import jakarta.persistence.*;
+import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.annotation.LastModifiedBy;
+import org.springframework.data.annotation.LastModifiedDate;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -16,6 +21,7 @@ import java.util.List;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
+@EntityListeners(AuditingEntityListener.class)
 public class Order {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -23,27 +29,38 @@ public class Order {
 
     // liên kết bảng user -> ai đặt hàng
     private Integer customerId;
+
+    private String reference;
     // mã đơn hàng
     private String orderNumber;
     // tổnsosotieenf trả
-    private Integer totalPayment;
+    private BigDecimal totalPayment;
 
     // ngàytaojo đơn
-    private LocalDateTime createDate;
+    @CreatedDate
+    @Column(updatable = false,nullable = false)
+    private LocalDateTime createdAt;
+
+    @LastModifiedDate
+    @Column(insertable = false)
+    private LocalDateTime lastModifiedDate;
 
     // ngày du tinh ship
-    private LocalDateTime dateShip;
+//    private LocalDateTime dateShip;
 
     // dia chi ship
-    private String addressShip;
+//    private String addressShip;
 
     // trang thai than toán
-    private String statusPayment;
+//    private String statusPayment;
 
     // ai ship
-    private Integer shipperId;
+//    private Integer shipperId;
+
+    @Enumerated(EnumType.STRING)
+    private PaymentMethod paymentMethod;
 
     // nhieuf món hàng
-    @OneToMany(cascade = CascadeType.ALL)
-    private List<OrderDetail> orderLineItemsList;
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "orders")
+    private List<OrderLine> orderLines;
 }

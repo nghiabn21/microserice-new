@@ -2,25 +2,49 @@ package com.programmingtechie.orderservice.controller;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.programmingtechie.orderservice.dto.OrderRequest;
+import com.programmingtechie.orderservice.dto.OrderResponse;
 import com.programmingtechie.orderservice.service.OrderService;
 import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
 import io.github.resilience4j.retry.annotation.Retry;
 import io.github.resilience4j.timelimiter.annotation.TimeLimiter;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
 @RestController
-@RequestMapping("/api/order")
+@RequestMapping("/api/v1/orders")
 @RequiredArgsConstructor
 @Slf4j
 public class OrderController {
 
     private final OrderService orderService;
+
+    @PostMapping
+    public ResponseEntity<Integer> createOrder(
+            @RequestBody @Valid OrderRequest request
+    ) {
+        return ResponseEntity.ok(this.orderService.createOrder(request));
+    }
+
+    @GetMapping
+    public ResponseEntity<List<OrderResponse>> findAll() {
+        return ResponseEntity.ok(this.orderService.findAllOrders());
+    }
+
+    @GetMapping("/{order-id}")
+    public ResponseEntity<OrderResponse> findById(
+            @PathVariable("order-id") Integer orderId
+    ) {
+        return ResponseEntity.ok(this.orderService.findById(orderId));
+    }
+
+
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)

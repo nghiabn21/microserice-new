@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @AllArgsConstructor
 @NoArgsConstructor
@@ -17,16 +18,22 @@ public class User {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
+    @Column(name = "name")
     private String name ;
 
+    @Column(name = "phone")
     private String phone;
 
-    private String address;
-
+    @Column(name = "email")
     private String email;
 
+    @Column(name = "date")
     private LocalDateTime date;
 
+    @Column(name = "status",columnDefinition = "varchar(255) default 'TRUE'")
     private String status;
+
+    @OneToMany(cascade = CascadeType.ALL)
+    private List<Address> address;
 
 }
