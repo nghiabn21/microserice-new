@@ -26,7 +26,7 @@
         <module>notification-service</module>
         <module>auth-service</module>
         <module>user-service</module>
-        <module>cart-service</module>
+        <module>payment-service</module>
         <module>shipping-service</module>
     </modules>
 

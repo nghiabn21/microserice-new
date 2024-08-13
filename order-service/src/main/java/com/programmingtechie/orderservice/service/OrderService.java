@@ -3,15 +3,25 @@ package com.programmingtechie.orderservice.service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.programmingtechie.orderservice.dto.InventoryResponse;
-import com.programmingtechie.orderservice.dto.OrderLineItemsDto;
-import com.programmingtechie.orderservice.dto.OrderRequest;
+import com.programmingtechie.orderservice.dto.*;
+import com.programmingtechie.orderservice.dto.request.OrderLineRequest;
+import com.programmingtechie.orderservice.dto.request.OrderRequest;
+import com.programmingtechie.orderservice.dto.request.PaymentRequest;
+import com.programmingtechie.orderservice.dto.request.PurchaseRequest;
+import com.programmingtechie.orderservice.dto.response.InventoryResponse;
+import com.programmingtechie.orderservice.dto.response.OrderResponse;
 import com.programmingtechie.orderservice.event.OrderPlacedEvent;
+import com.programmingtechie.orderservice.exception.BusinessException;
 import com.programmingtechie.orderservice.model.Order;
 import com.programmingtechie.orderservice.model.OrderLine;
+import com.programmingtechie.orderservice.openfeign.CustomerClient;
+import com.programmingtechie.orderservice.openfeign.PaymentClient;
+import com.programmingtechie.orderservice.openfeign.ProductClient;
+import com.programmingtechie.orderservice.producer.OrderProducer;
 import com.programmingtechie.orderservice.repository.OrderRepository;
 import com.programmingtechie.orderservice.utils.OrderMapper;
 import io.micrometer.tracing.Tracer;
+import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.kafka.clients.producer.ProducerRecord;
@@ -28,6 +38,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -48,35 +59,41 @@ public class OrderService {
     private final KafkaTemplate<Integer, String> kafkaTemplate;
 
     private final OrderRepository repository;
+
     private final OrderMapper mapper;
+
     private final CustomerClient customerClient;
+
     private final PaymentClient paymentClient;
+
     private final ProductClient productClient;
+
     private final OrderLineService orderLineService;
+
     private final OrderProducer orderProducer;
 
     @Transactional
     public Integer createOrder(OrderRequest request) {
-        var customer = this.customerClient.findCustomerById(request.customerId())
+        var customer = this.customerClient.findCustomerById(request.getCustomerId())
                 .orElseThrow(() -> new BusinessException("Cannot create order:: No customer exists with the provided ID"));
 
-        var purchasedProducts = productClient.purchaseProducts(request.products());
+        var purchasedProducts = productClient.purchaseProducts(request.getProducts());
 
         var order = this.repository.save(mapper.toOrder(request));
 
-        for (PurchaseRequest purchaseRequest : request.products()) {
+        for (PurchaseRequest purchaseRequest : request.getProducts()) {
             orderLineService.saveOrderLine(
                     new OrderLineRequest(
                             null,
                             order.getId(),
-                            purchaseRequest.productId(),
-                            purchaseRequest.quantity()
+                            purchaseRequest.getProductId(),
+                            purchaseRequest.getQuantity()
                     )
             );
         }
         var paymentRequest = new PaymentRequest(
-                request.amount(),
-                request.paymentMethod(),
+                request.getAmount(),
+                request.getPaymentMethod(),
                 order.getId(),
                 order.getReference(),
                 customer
@@ -85,9 +102,9 @@ public class OrderService {
 
         orderProducer.sendOrderConfirmation(
                 new OrderConfirmation(
-                        request.reference(),
-                        request.amount(),
-                        request.paymentMethod(),
+                        request.getReference(),
+                        request.getAmount(),
+                        request.getPaymentMethod(),
                         customer,
                         purchasedProducts
                 )
@@ -119,9 +136,9 @@ public class OrderService {
                 .map(order1 -> mapToDto(order1))
                 .toList();
 
-        order.setOrderLineItemsList(orderLineItems);
+        order.setOrderLines(orderLineItems);
 
-        List<Integer> listSkuCode = order.getOrderLineItemsList().stream()
+        List<Integer> listSkuCode = order.getOrderLines().stream()
                 .map(OrderLine::getProductId)
                 .toList();
 

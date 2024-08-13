@@ -23,36 +23,44 @@ public class UserService {
     private final CustomerMapper customerMapper;
 
     public Integer createCustomer(CustomerRequest customerRequest) {
-        var customer = customerRepository.save(
-                customerMapper.toCustomer(customerRequest));
+        User user = User.builder()
+                .name(customerRequest.getName())
+                .email(customerRequest.getEmail())
+                .phone(customerRequest.getPhone())
+                .address(customerRequest.getAddress())
+                .date(customerRequest.getDate())
+                .status(customerRequest.getStatus())
+                .build();
+        User customer = customerRepository.save(user);
         return customer.getId();
 
     }
 
-    public void updateCustomer(CustomerRequest customerRequest) {
+    public User updateCustomer(CustomerRequest customerRequest) {
         User user = customerRepository.findById(customerRequest.getId())
                 .orElseThrow(() -> new CustomerNotFoundException("ID không tìm thấy user"));
         mergeCustomer(user, customerRequest);
-        customerRepository.save(user);
+        User user1 = customerRepository.save(user);
+        return user1;
     }
 
     private void mergeCustomer(User user, CustomerRequest customerRequest) {
-        if(StringUtils.isNotBlank(customerRequest.getName())){
+        if (StringUtils.isNotBlank(customerRequest.getName())) {
             user.setName(customerRequest.getName());
         }
-        if(StringUtils.isNotBlank(customerRequest.getPhone())){
+        if (StringUtils.isNotBlank(customerRequest.getPhone())) {
             user.setPhone(customerRequest.getPhone());
         }
-        if(StringUtils.isNotBlank(customerRequest.getEmail())){
+        if (StringUtils.isNotBlank(customerRequest.getEmail())) {
             user.setEmail(customerRequest.getEmail());
         }
-        if(!customerRequest.getAddress().isEmpty()){
+        if (!customerRequest.getAddress().isEmpty()) {
             user.setAddress(customerRequest.getAddress());
         }
-        if(StringUtils.isNotBlank(customerRequest.getDate().toString())){
+        if (StringUtils.isNotBlank(customerRequest.getDate().toString())) {
             user.setDate(customerRequest.getDate());
         }
-        if(StringUtils.isNotBlank(customerRequest.getStatus())){
+        if (StringUtils.isNotBlank(customerRequest.getStatus())) {
             user.setStatus(customerRequest.getStatus());
         }
 
@@ -63,25 +71,22 @@ public class UserService {
                 .collect(Collectors.toList());
     }
 
-    public CustomerReponse findUserById(String id) {
-        Integer userId = Integer.valueOf(id);
-        CustomerReponse user = customerRepository.findById(userId)
+    public CustomerReponse findUserById(Integer id) {
+        CustomerReponse user = customerRepository.findById(id)
                 .map(customerMapper::fromCustomerReponse)
                 .orElseThrow(() -> new CustomerNotFoundException("ID không tìm thấy user"));
         return user;
     }
 
-    public Boolean existUserById(String id) {
-        Integer userId = Integer.valueOf(id);
-        return customerRepository.findById(userId).isPresent();
+    public Boolean existUserById(Integer id) {
+        return customerRepository.findById(id).isPresent();
     }
 
-    public Boolean deleteUserById(String id) {
-        Integer userId = Integer.valueOf(id);
-        int deleteId = customerRepository.deleteUserById(userId);
-        if(deleteId > 0){
-            return true ;
+    public String deleteUserById(Integer id) {
+        int deleteId = customerRepository.deleteUserById(id);
+        if (deleteId > 0) {
+            return "Delete Success!!!";
         }
-        return false ;
+        return "Delete failure!!!";
     }
 }

@@ -1,10 +1,7 @@
 package com.programmingtechie.orderservice.model;
 
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 import jakarta.persistence.*;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedBy;
@@ -19,6 +16,7 @@ import java.util.List;
 @Table(name = "orders")
 @Getter
 @Setter
+@Builder
 @NoArgsConstructor
 @AllArgsConstructor
 @EntityListeners(AuditingEntityListener.class)
@@ -33,10 +31,10 @@ public class Order {
     private String reference;
     // mã đơn hàng
     private String orderNumber;
-    // tổnsosotieenf trả
-    private BigDecimal totalPayment;
+    // tổng tiền trả
+    private BigDecimal totalAmount;
 
-    // ngàytaojo đơn
+    // ngày tạo đơn
     @CreatedDate
     @Column(updatable = false,nullable = false)
     private LocalDateTime createdAt;

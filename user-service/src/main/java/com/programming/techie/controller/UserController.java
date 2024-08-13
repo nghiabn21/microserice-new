@@ -22,13 +22,12 @@ public class UserController {
 
     @PostMapping
     public ResponseEntity<?> postUser(@RequestBody @Valid CustomerRequest customerRequest){
-       return ResponseEntity.ok(userService.createCustomer(customerRequest));
+       return ResponseEntity.status(HttpStatus.CREATED).body(userService.createCustomer(customerRequest));
     }
 
     @PutMapping
     public ResponseEntity<?> putUser(@RequestBody @Valid CustomerRequest customerRequest){
-        userService.updateCustomer(customerRequest);
-        return ResponseEntity.ok(HttpStatus.ACCEPTED);
+        return ResponseEntity.status(HttpStatus.ACCEPTED).body(userService.updateCustomer(customerRequest));
     }
 
     @GetMapping
@@ -37,18 +36,18 @@ public class UserController {
     }
 
     @GetMapping("/exits/{id}")
-    public ResponseEntity<Boolean> exitsUserById(@PathVariable(name = "id") String id){
+    public ResponseEntity<Boolean> exitsUserById(@PathVariable(name = "id") Integer id){
         return ResponseEntity.ok(userService.existUserById(id));
     }
 
 
     @GetMapping("/{id}")
-    public ResponseEntity<CustomerReponse> findUserById(@PathVariable(name = "id") String id){
+    public ResponseEntity<CustomerReponse> findUserById(@PathVariable(name = "id") Integer id){
         return ResponseEntity.ok(userService.findUserById(id));
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Boolean> delete(@PathVariable(name = "id") String id){
+    public ResponseEntity<?> delete(@PathVariable(name = "id") Integer id){
         return ResponseEntity.ok(userService.deleteUserById(id));
     }
 }

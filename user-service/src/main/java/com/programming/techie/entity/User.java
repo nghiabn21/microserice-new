@@ -30,7 +30,7 @@ public class User {
     @Column(name = "date")
     private LocalDateTime date;
 
-    @Column(name = "status",columnDefinition = "varchar(255) default 'TRUE'")
+    @Column(name = "status")
     private String status;
 
     @OneToMany(cascade = CascadeType.ALL)

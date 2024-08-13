@@ -1,8 +1,8 @@
 package com.programmingtechie.orderservice.controller;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.programmingtechie.orderservice.dto.OrderRequest;
-import com.programmingtechie.orderservice.dto.OrderResponse;
+import com.programmingtechie.orderservice.dto.request.OrderRequest;
+import com.programmingtechie.orderservice.dto.response.OrderResponse;
 import com.programmingtechie.orderservice.service.OrderService;
 import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
 import io.github.resilience4j.retry.annotation.Retry;

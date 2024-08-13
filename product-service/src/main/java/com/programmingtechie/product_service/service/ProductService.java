@@ -1,10 +1,10 @@
 package com.programmingtechie.product_service.service;
 
 
-import com.programmingtechie.product_service.dto.ProductPerchaseRequest;
-import com.programmingtechie.product_service.dto.ProductPerchaseResponse;
-import com.programmingtechie.product_service.dto.ProductRequest;
-import com.programmingtechie.product_service.dto.ProductResponse;
+import com.programmingtechie.product_service.dto.request.ProductPerchaseRequest;
+import com.programmingtechie.product_service.dto.response.ProductPerchaseResponse;
+import com.programmingtechie.product_service.dto.request.ProductRequest;
+import com.programmingtechie.product_service.dto.response.ProductResponse;
 import com.programmingtechie.product_service.exception.ProductsPurchaseException;
 import com.programmingtechie.product_service.model.Branch;
 import com.programmingtechie.product_service.model.Product;
@@ -73,7 +73,7 @@ public class ProductService {
         // lấy các id của sản phẩm muốn mua
         List<Integer> products = requests.stream().map(ProductPerchaseRequest::getProductId).toList();
 
-        // lấy id sản phẩm muoons mua tìm kiếm trong db xem còn hay k
+        // lấy id sản phẩm muốn mua tìm kiếm trong db xem còn hay k
         List<Product> storedProducts = productRepository.findAllByIdInOrderById(products);
 
         //ng dùng mua 1,2,3 mà trong db có 1,2 => lỗi
@@ -84,10 +84,12 @@ public class ProductService {
         List<ProductPerchaseRequest> storesRequest = requests.stream()
                 .sorted(Comparator.comparing(ProductPerchaseRequest::getProductId)).collect(Collectors.toList());
 
-        var purchasedProducts = new ArrayList<ProductPerchaseResponse>();
+        List<ProductPerchaseResponse> purchasedProducts = new ArrayList<>();
 
         for(int i = 0 ; i < storedProducts.size() ;  i++) {
+            // sản phẩm trong db
             Product product = storedProducts.get(i);
+            // sản phẩm khách đặt
             ProductPerchaseRequest productRequest = storesRequest.get(i);
 
             if (product.getAvailableQuantity() < productRequest.getQuantity()) {

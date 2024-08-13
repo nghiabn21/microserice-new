@@ -1,10 +1,10 @@
 package com.programmingtechie.product_service.controllder;
 
 
-import com.programmingtechie.product_service.dto.ProductPerchaseRequest;
-import com.programmingtechie.product_service.dto.ProductPerchaseResponse;
-import com.programmingtechie.product_service.dto.ProductRequest;
-import com.programmingtechie.product_service.dto.ProductResponse;
+import com.programmingtechie.product_service.dto.request.ProductPerchaseRequest;
+import com.programmingtechie.product_service.dto.response.ProductPerchaseResponse;
+import com.programmingtechie.product_service.dto.request.ProductRequest;
+import com.programmingtechie.product_service.dto.response.ProductResponse;
 import com.programmingtechie.product_service.service.ProductService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;

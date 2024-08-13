@@ -8,8 +8,9 @@ services:
     environment:
       POSTGRES_USER: admin
       POSTGRES_PASSWORD: admin
-      POSTGRES_DB: customer
+      POSTGRES_MULTIPLE_DATABASES: manager_user,manager_product,manager_order
     volumes:
+      - ./create-databases.sh:/docker-entrypoint-initdb.d/create-databases.sh
       - postgresql:/var/lib/postgresql/data
     ports:
       - "5432:5432"

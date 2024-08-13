@@ -1,7 +1,7 @@
 package com.programmingtechie.product_service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.programmingtechie.product_service.dto.ProductRequest;
+import com.programmingtechie.product_service.dto.request.ProductRequest;
 import com.programmingtechie.product_service.repository.ProductRepository;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
