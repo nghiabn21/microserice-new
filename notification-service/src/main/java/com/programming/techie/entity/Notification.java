@@ -22,7 +22,9 @@ public class Notification {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer Id;
 
+    @Enumerated(EnumType.STRING)
     private NotificationType type;
+
     private LocalDateTime notificationDate;
 
     @OneToOne(cascade = CascadeType.ALL)

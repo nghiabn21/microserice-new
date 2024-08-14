@@ -1,6 +1,5 @@
 package com.programming.techie.dto;
 
-import com.programming.techie.entity.PaymentMethod;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;

@@ -27,8 +27,8 @@ public class EmailService {
     private final JavaMailSender mailSender;
     private final SpringTemplateEngine templateEngine;
 
-    @Async
-    public void sendPaymentSuccessEmail(String destinationEmail, String customerName, BigDecimal amount,
+    @Async // thực thi trong các luồng (threads) khác, tách biệt khỏi luồng chính của ứng dụng
+    public void sendPaymentSuccessEmail(String sendTo, String customerName, BigDecimal amount,
                                         String orderReference) throws MessagingException {
 
         MimeMessage mimeMessage = mailSender.createMimeMessage();
@@ -48,12 +48,12 @@ public class EmailService {
         context.setVariables(variables);
         messageHelper.setSubject(EmailTemplates.PAYMENT_CONFIRMATION.getSubject());
 
-        sendTemplateEmail(destinationEmail, mimeMessage, messageHelper, templateName, context);
+        sendTemplateEmail(sendTo, mimeMessage, messageHelper, templateName, context);
 
     }
 
     @Async
-    public void sendOrderConfirmationEmail(String destinationEmail, String customerName, BigDecimal amount,
+    public void sendOrderConfirmationEmail(String sendTo, String customerName, BigDecimal amount,
                                            String orderReference, List<Product> products) throws MessagingException {
         MimeMessage mimeMessage = mailSender.createMimeMessage();
         MimeMessageHelper messageHelper = new MimeMessageHelper(mimeMessage,
@@ -72,20 +72,20 @@ public class EmailService {
         context.setVariables(variables);
         messageHelper.setSubject(EmailTemplates.ORDER_CONFIRMATION.getSubject());
 
-        sendTemplateEmail(destinationEmail, mimeMessage, messageHelper, templateName, context);
+        sendTemplateEmail(sendTo, mimeMessage, messageHelper, templateName, context);
     }
 
-    private void sendTemplateEmail(String destinationEmail, MimeMessage mimeMessage, MimeMessageHelper messageHelper,
+    private void sendTemplateEmail(String sendTo, MimeMessage mimeMessage, MimeMessageHelper messageHelper,
                                    String templateName, Context context){
         try {
             String htmlTemplate = templateEngine.process(templateName, context);
             messageHelper.setText(htmlTemplate, true);
 
-            messageHelper.setTo(destinationEmail);
+            messageHelper.setTo(sendTo);
             mailSender.send(mimeMessage);
-            log.info(String.format("INFO - Email successfully sent to %s with template %s ", destinationEmail, templateName));
+            log.info(String.format("INFO - Email successfully sent to %s with template %s ", sendTo, templateName));
         } catch (MessagingException e) {
-            log.warn("WARNING - Cannot send Email to {} ", destinationEmail);
+            log.warn("WARNING - Cannot send Email to {} ", sendTo);
         }
     }
 }

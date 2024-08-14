@@ -2,17 +2,15 @@ package com.programming.techie.entity;
 
 import com.programming.techie.dto.PaymentMethod;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.math.BigDecimal;
 import java.util.List;
 
 @AllArgsConstructor
 @NoArgsConstructor
-@Data
+@Getter
+@Setter
 @Builder
 @Entity
 @Table(name = "order_info")
@@ -25,6 +23,8 @@ public class OrderInfo {
 
     private String orderReference;
     private BigDecimal totalAmount;
+
+    @Enumerated(EnumType.STRING)
     private PaymentMethod paymentMethod;
 
     @OneToOne(cascade = CascadeType.ALL, mappedBy = "orderInfo")

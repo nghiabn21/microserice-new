@@ -36,6 +36,7 @@ public class NotificationsConsumer {
         String sequenceName = "PAYMENT_SEQ";
         int id = jdbcTemplate.queryForObject("SELECT " + sequenceName + ".nextval FROM dual", Integer.class);
 
+        //save information for payment
         PaymentInfo paymentInfo = PaymentInfo.builder()
                 .id(id)
                 .orderReference(paymentConfirmation.getOrderReference())
@@ -53,6 +54,7 @@ public class NotificationsConsumer {
         );
         String customerName = paymentConfirmation.getCustomerName();
 
+        // send email payment to customer
         emailService.sendPaymentSuccessEmail(
                 paymentConfirmation.getCustomerEmail(),
                 customerName,

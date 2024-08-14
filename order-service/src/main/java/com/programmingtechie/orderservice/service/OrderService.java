@@ -60,8 +60,6 @@ public class OrderService {
 
     private final KafkaTemplate<Integer, String> kafkaTemplate;
 
-    private final OrderRepository repository;
-
     private final OrderMapper mapper;
 
     private final CustomerClient customerClient;
@@ -83,7 +81,7 @@ public class OrderService {
         // truyền 1 list sản phẩm mua tới product kiểm tra con hàng k
         List<PurchaseResponse> purchasedProducts = productClient.purchaseProducts(request.getProducts());
 
-        Order order = repository.save(mapper.toOrder(request));
+        Order order = orderRepository.save(mapper.toOrder(request));
 
         for (PurchaseRequest purchaseRequest : request.getProducts()) {
             //lấy thông tin cua tung san pham gán vao orderline
@@ -96,6 +94,7 @@ public class OrderService {
                     )
             );
         }
+        // create object payment
         PaymentRequest paymentRequest = new PaymentRequest(
                 request.getAmount(),
                 request.getPaymentMethod(),
@@ -103,8 +102,11 @@ public class OrderService {
                 order.getReference(),
                 customer
         );
+
+        //use openfeign to call api post in service-payment
         paymentClient.requestOrderPayment(paymentRequest);
 
+        //use kafka send info order to service-information to send email to customer
         orderProducer.sendOrderConfirmation(
                 new OrderConfirmation(
                         request.getReference(),
@@ -119,15 +121,15 @@ public class OrderService {
     }
 
     public List<OrderResponse> findAllOrders() {
-        return this.repository.findAll()
+        return orderRepository.findAll()
                 .stream()
-                .map(this.mapper::fromOrder)
+                .map(mapper::fromOrder)
                 .collect(Collectors.toList());
     }
 
     public OrderResponse findById(Integer id) {
-        return this.repository.findById(id)
-                .map(this.mapper::fromOrder)
+        return orderRepository.findById(id)
+                .map(mapper::fromOrder)
                 .orElseThrow(() ->
                         new EntityNotFoundException(String.format("No order found with the provided ID: %d", id)));
     }

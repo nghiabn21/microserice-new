@@ -1,4 +1,4 @@
-package com.programming.techie.entity;
+package com.programming.techie.dto;
 
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotNull;

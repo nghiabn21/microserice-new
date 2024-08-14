@@ -21,6 +21,7 @@ public class PaymentService {
         if (request == null) {
             return null;
         }
+        // save information payment
         Payment payment = Payment.builder()
                 .id(request.getId())
                 .paymentMethod(request.getPaymentMethod())
@@ -29,6 +30,7 @@ public class PaymentService {
                 .build();
         repository.save(payment);
 
+        // use kafka to send email to customer
         notificationProducer.sendNotification(
                 new PaymentNotificationRequest(
                         request.getOrderReference(),

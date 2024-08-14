@@ -1,5 +1,6 @@
 package com.programming.techie.entity;
 
+import com.programming.techie.dto.PaymentMethod;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EntityListeners;

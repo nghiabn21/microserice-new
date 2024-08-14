@@ -1,4 +1,4 @@
-package com.programming.techie.entity;
+package com.programming.techie.dto;
 
 public enum PaymentMethod {
 
