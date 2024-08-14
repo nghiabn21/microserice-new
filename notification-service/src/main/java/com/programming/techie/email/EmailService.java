@@ -76,7 +76,7 @@ public class EmailService {
     }
 
     private void sendTemplateEmail(String destinationEmail, MimeMessage mimeMessage, MimeMessageHelper messageHelper,
-                                   String templateName, Context context) throws jakarta.mail.MessagingException {
+                                   String templateName, Context context){
         try {
             String htmlTemplate = templateEngine.process(templateName, context);
             messageHelper.setText(htmlTemplate, true);
