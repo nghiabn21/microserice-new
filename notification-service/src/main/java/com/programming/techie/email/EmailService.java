@@ -1,6 +1,7 @@
 package com.programming.techie.email;
 
 
+import com.programming.techie.Enum.EmailTemplates;
 import com.programming.techie.entity.Product;
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;

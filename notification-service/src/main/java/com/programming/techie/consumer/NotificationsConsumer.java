@@ -8,7 +8,7 @@ import com.programming.techie.entity.Notification;
 import com.programming.techie.entity.OrderInfo;
 import com.programming.techie.entity.PaymentInfo;
 import com.programming.techie.repo.NotificationRepository;
-import com.programming.techie.entity.NotificationType;
+import com.programming.techie.Enum.NotificationType;
 import jakarta.mail.MessagingException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

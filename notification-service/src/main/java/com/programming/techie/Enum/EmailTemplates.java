@@ -1,4 +1,4 @@
-package com.programming.techie.email;
+package com.programming.techie.Enum;
 import lombok.Getter;
 
 public enum EmailTemplates {
