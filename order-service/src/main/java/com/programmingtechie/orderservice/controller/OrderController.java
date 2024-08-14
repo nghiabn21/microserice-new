@@ -26,22 +26,18 @@ public class OrderController {
     private final OrderService orderService;
 
     @PostMapping
-    public ResponseEntity<Integer> createOrder(
-            @RequestBody @Valid OrderRequest request
-    ) {
-        return ResponseEntity.ok(this.orderService.createOrder(request));
+    public ResponseEntity<Integer> createOrder(@RequestBody @Valid OrderRequest request) {
+        return ResponseEntity.ok(orderService.createOrder(request));
     }
 
     @GetMapping
     public ResponseEntity<List<OrderResponse>> findAll() {
-        return ResponseEntity.ok(this.orderService.findAllOrders());
+        return ResponseEntity.ok(orderService.findAllOrders());
     }
 
     @GetMapping("/{order-id}")
-    public ResponseEntity<OrderResponse> findById(
-            @PathVariable("order-id") Integer orderId
-    ) {
-        return ResponseEntity.ok(this.orderService.findById(orderId));
+    public ResponseEntity<OrderResponse> findById(@PathVariable("order-id") Integer orderId) {
+        return ResponseEntity.ok(orderService.findById(orderId));
     }
 
 

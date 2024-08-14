@@ -2,6 +2,7 @@ package com.programming.techie.service;
 
 import com.programming.techie.dto.PaymentNotificationRequest;
 import com.programming.techie.dto.PaymentRequest;
+import com.programming.techie.entity.Payment;
 import com.programming.techie.notification.NotificationProducer;
 import com.programming.techie.repository.PaymentRepository;
 import com.programming.techie.utils.PaymentMapper;
@@ -17,15 +18,23 @@ public class PaymentService {
     private final NotificationProducer notificationProducer;
 
     public Integer createPayment(PaymentRequest request) {
-        var payment = this.repository.save(this.mapper.toPayment(request));
+        if (request == null) {
+            return null;
+        }
+        Payment payment = Payment.builder()
+                .id(request.getId())
+                .paymentMethod(request.getPaymentMethod())
+                .amount(request.getAmount())
+                .orderId(request.getOrderId())
+                .build();
+        repository.save(payment);
 
-        this.notificationProducer.sendNotification(
+        notificationProducer.sendNotification(
                 new PaymentNotificationRequest(
                         request.getOrderReference(),
                         request.getAmount(),
                         request.getPaymentMethod(),
-                        request.getCustomer().getFirstname(),
-                        request.getCustomer().getLastname(),
+                        request.getCustomer().getName(),
                         request.getCustomer().getEmail()
                 )
         );

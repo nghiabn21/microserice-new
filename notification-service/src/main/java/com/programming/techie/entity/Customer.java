@@ -1,7 +1,6 @@
 package com.programming.techie.entity;
 
-import jakarta.validation.constraints.Email;
-import jakarta.validation.constraints.NotNull;
+import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -11,14 +10,16 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @Data
 @Builder
+@Entity
+@Table(name = "customer")
 public class Customer {
-
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
-
-    @NotNull(message = "Name is required")
     private String name;
-
-    @NotNull(message = "Email is required")
-    @Email(message = "The customer email is not correctly formatted")
     private String email;
+
+    @OneToOne
+    @JoinColumn(name = "order_info_id")
+    private OrderInfo orderInfo;
 }

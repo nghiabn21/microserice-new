@@ -8,8 +8,10 @@ import com.programmingtechie.orderservice.dto.request.OrderLineRequest;
 import com.programmingtechie.orderservice.dto.request.OrderRequest;
 import com.programmingtechie.orderservice.dto.request.PaymentRequest;
 import com.programmingtechie.orderservice.dto.request.PurchaseRequest;
+import com.programmingtechie.orderservice.dto.response.CustomerResponse;
 import com.programmingtechie.orderservice.dto.response.InventoryResponse;
 import com.programmingtechie.orderservice.dto.response.OrderResponse;
+import com.programmingtechie.orderservice.dto.response.PurchaseResponse;
 import com.programmingtechie.orderservice.event.OrderPlacedEvent;
 import com.programmingtechie.orderservice.exception.BusinessException;
 import com.programmingtechie.orderservice.model.Order;
@@ -74,14 +76,17 @@ public class OrderService {
 
     @Transactional
     public Integer createOrder(OrderRequest request) {
-        var customer = this.customerClient.findCustomerById(request.getCustomerId())
-                .orElseThrow(() -> new BusinessException("Cannot create order:: No customer exists with the provided ID"));
+        CustomerResponse customer = customerClient.findCustomerById(request.getCustomerId())
+                .orElseThrow(() ->
+                        new BusinessException("Cannot create order:: No customer exists with the provided ID"));
 
-        var purchasedProducts = productClient.purchaseProducts(request.getProducts());
+        // truyền 1 list sản phẩm mua tới product kiểm tra con hàng k
+        List<PurchaseResponse> purchasedProducts = productClient.purchaseProducts(request.getProducts());
 
-        var order = this.repository.save(mapper.toOrder(request));
+        Order order = repository.save(mapper.toOrder(request));
 
         for (PurchaseRequest purchaseRequest : request.getProducts()) {
+            //lấy thông tin cua tung san pham gán vao orderline
             orderLineService.saveOrderLine(
                     new OrderLineRequest(
                             null,
@@ -91,7 +96,7 @@ public class OrderService {
                     )
             );
         }
-        var paymentRequest = new PaymentRequest(
+        PaymentRequest paymentRequest = new PaymentRequest(
                 request.getAmount(),
                 request.getPaymentMethod(),
                 order.getId(),
@@ -123,7 +128,8 @@ public class OrderService {
     public OrderResponse findById(Integer id) {
         return this.repository.findById(id)
                 .map(this.mapper::fromOrder)
-                .orElseThrow(() -> new EntityNotFoundException(String.format("No order found with the provided ID: %d", id)));
+                .orElseThrow(() ->
+                        new EntityNotFoundException(String.format("No order found with the provided ID: %d", id)));
     }
 
 
