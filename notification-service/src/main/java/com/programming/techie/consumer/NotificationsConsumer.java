@@ -31,7 +31,7 @@ public class NotificationsConsumer {
     private final EmailService emailService;
 
     @KafkaListener(topics = "payment-topic")
-    public void consumePaymentSuccessNotifications(PaymentConfirmation paymentConfirmation) throws MessagingException {
+    public Integer consumePaymentSuccessNotifications(PaymentConfirmation paymentConfirmation) throws MessagingException {
         log.info(format("Consuming the message from payment-topic Topic:: %s", paymentConfirmation));
         String sequenceName = "PAYMENT_SEQ";
         int id = jdbcTemplate.queryForObject("SELECT " + sequenceName + ".nextval FROM dual", Integer.class);
@@ -46,12 +46,14 @@ public class NotificationsConsumer {
                 .customerEmail(paymentConfirmation.getCustomerEmail())
                 .build();
 
-        repository.save( Notification.builder()
+        Notification notification = repository.save( Notification.builder()
                         .type(NotificationType.PAYMENT_CONFIRMATION)
                         .notificationDate(LocalDateTime.now())
                         .paymentConfirmation(paymentInfo)
                         .build()
         );
+
+        log.info("Successfully save information about payment with ID: {} ", notification.getId());
         String customerName = paymentConfirmation.getCustomerName();
 
         // send email payment to customer
@@ -61,6 +63,7 @@ public class NotificationsConsumer {
                 paymentConfirmation.getAmount(),
                 paymentConfirmation.getOrderReference()
         );
+        return notification.getId();
     }
 
     @KafkaListener(topics = "order-topic")
