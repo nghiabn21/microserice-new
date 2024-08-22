@@ -23,7 +23,7 @@ public class OrderLineService {
         OrderLine order = OrderLine.builder()
                 .id(request.getOrderId())
                 .productId(request.getProductId())
-                .orders(
+                .order(
                         Order.builder()
                                 .id(request.getOrderId())
                                 .build()

@@ -59,6 +59,6 @@ public class Order {
     private PaymentMethod paymentMethod;
 
     // nhieuf món hàng
-    @OneToMany(cascade = CascadeType.ALL, mappedBy = "orders")
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "order")
     private List<OrderLine> orderLines;
 }

@@ -42,16 +42,16 @@ public class OrderController {
 
 
 
-    @PostMapping
-    @ResponseStatus(HttpStatus.CREATED)
-    @CircuitBreaker(name = "inventory", fallbackMethod = "fallbackMethod")
-    @TimeLimiter(name = "inventory")
-    @Retry(name = "inventory")
-    public ResponseEntity<?> placeOrder(@RequestBody OrderRequest orderRequest) throws JsonProcessingException {
-        orderService.placeOrder(orderRequest);
-        log.info("Sau khi truy van xong");
-        return ResponseEntity.status(HttpStatus.CREATED).body("Order Successfully");
-    }
+//    @PostMapping
+//    @ResponseStatus(HttpStatus.CREATED)
+//    @CircuitBreaker(name = "inventory", fallbackMethod = "fallbackMethod")
+//    @TimeLimiter(name = "inventory")
+//    @Retry(name = "inventory")
+//    public ResponseEntity<?> placeOrder(@RequestBody OrderRequest orderRequest) throws JsonProcessingException {
+//        orderService.placeOrder(orderRequest);
+//        log.info("Sau khi truy van xong");
+//        return ResponseEntity.status(HttpStatus.CREATED).body("Order Successfully");
+//    }
 
     /**
      * CompletableFuture: lập trình bất đồng bộ và xử lý đồng thời.

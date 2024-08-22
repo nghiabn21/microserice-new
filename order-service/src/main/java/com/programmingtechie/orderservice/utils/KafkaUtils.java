@@ -20,20 +20,20 @@ import static org.springframework.kafka.support.KafkaHeaders.TOPIC;
 
 @Log4j2
 public class KafkaUtils {
-    public static Integer getMessageKafka(ReplyingKafkaTemplate<String, Object, Object> replyingTemplate, String key, String a) {
+    public static Integer getMessageKafka(ReplyingKafkaTemplate<String, String, String> replyingTemplate, String topic, String value1) {
         try {
             log.info("getMessageKafka : request send kafka -----> ");
             ObjectMapper objectMapper = new ObjectMapper();
-            String value = objectMapper.writeValueAsString(a);;
+            String value = objectMapper.writeValueAsString(value1);
 
-            ProducerRecord<String, Object> record = buildProducerRecord(TOPIC,key,value);
+            ProducerRecord<String, String> record = new ProducerRecord<>(topic, topic + UUID.randomUUID(), value1);
 
-            record.headers().add(new RecordHeader(KafkaHeaders.REPLY_TOPIC, a.getBytes()));
+            record.headers().add(new RecordHeader(KafkaHeaders.REPLY_TOPIC, topic.getBytes()));
             record.headers().add(new RecordHeader(KafkaHeaders.CORRELATION_ID, UUID.randomUUID().toString().getBytes()));
 
-            RequestReplyFuture<String, Object, Object> replyFuture = replyingTemplate.sendAndReceive(record);
+            RequestReplyFuture<String, String, String> replyFuture = replyingTemplate.sendAndReceive(record);
 
-            ConsumerRecord<String, Object> consumerRecord = replyFuture.get(10, TimeUnit.SECONDS);
+            ConsumerRecord<String, String> consumerRecord = replyFuture.get(10, TimeUnit.SECONDS);
 
             String val = consumerRecord.value().toString();
 
@@ -51,7 +51,7 @@ public class KafkaUtils {
         }
     }
 
-    private static ProducerRecord<String, Object> buildProducerRecord(String topic, String key, String value) {
+    private static ProducerRecord<String, String> buildProducerRecord(String topic, String key, String value) {
         List<Header> recordHeaders = List.of(new RecordHeader("event-source", "scanner".getBytes()));
         return new ProducerRecord<>(topic, null, key, value, recordHeaders);
     }

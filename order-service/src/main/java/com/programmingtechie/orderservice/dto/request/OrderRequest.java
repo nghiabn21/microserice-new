@@ -30,8 +30,8 @@ public class OrderRequest {
     private PaymentMethod paymentMethod;
 
     @NotNull(message = "Customer should be present")  // không phải null
-    @NotEmpty(message = "Customer should be present") // không null và không phải chuối hay list rỗng ""
-    @NotBlank(message = "Customer should be present") // không null, không chuỗi hay list rỗng "", không chứa khoảng trắng
+//    @NotEmpty(message = "Customer should be present") // không null và không phải chuối hay list rỗng ""
+//    @NotBlank(message = "Customer should be present") // không null, không chuỗi hay list rỗng "", không chứa khoảng trắng
     private Integer customerId;
 
     @NotEmpty(message = "Bạn nên mua ít nhất một sản phẩm")

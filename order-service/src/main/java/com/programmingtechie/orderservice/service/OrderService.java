@@ -21,6 +21,7 @@ import com.programmingtechie.orderservice.openfeign.PaymentClient;
 import com.programmingtechie.orderservice.openfeign.ProductClient;
 import com.programmingtechie.orderservice.producer.OrderProducer;
 import com.programmingtechie.orderservice.repository.OrderRepository;
+import com.programmingtechie.orderservice.utils.KafkaUtils;
 import com.programmingtechie.orderservice.utils.OrderMapper;
 import io.micrometer.tracing.Tracer;
 import jakarta.persistence.EntityNotFoundException;
@@ -29,8 +30,11 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.kafka.clients.producer.ProducerRecord;
 import org.apache.kafka.common.header.Header;
 import org.apache.kafka.common.header.internals.RecordHeader;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.kafka.core.KafkaTemplate;
+import org.springframework.kafka.requestreply.ReplyingKafkaTemplate;
+import org.springframework.kafka.support.KafkaHeaders;
 import org.springframework.kafka.support.SendResult;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -54,17 +58,20 @@ public class OrderService {
 
     private final OrderRepository orderRepository;
 
-    private final WebClient.Builder webClient;
+    @Autowired
+    private WebClient.Builder webClient;
 
     private final Tracer tracer;
-
-    private final KafkaTemplate<Integer, String> kafkaTemplate;
+    @Autowired
+    private KafkaTemplate<String, String> kafkaTemplate;
 
     private final OrderMapper mapper;
 
-    private final CustomerClient customerClient;
+    @Autowired
+    CustomerClient customerClient;
 
-    private final PaymentClient paymentClient;
+    @Autowired
+    private PaymentClient paymentClient;
 
     private final ProductClient productClient;
 
@@ -72,8 +79,15 @@ public class OrderService {
 
     private final OrderProducer orderProducer;
 
+    @Autowired
+    private ReplyingKafkaTemplate<String, String, String> replyingTemplate;
+
     @Transactional
     public Integer createOrder(OrderRequest request) {
+        String orderId = "Test send kafka";
+        Integer id = KafkaUtils.getMessageKafka(replyingTemplate, KafkaHeaders.TOPIC,orderId);
+        log.info("Create order with id {}", id);
+
         CustomerResponse customer = customerClient.findCustomerById(request.getCustomerId())
                 .orElseThrow(() ->
                         new BusinessException("Cannot create order:: No customer exists with the provided ID"));
@@ -135,7 +149,7 @@ public class OrderService {
     }
 
 
-    public CompletableFuture<SendResult<Integer, String>> placeOrder(OrderRequest orderRequest) throws JsonProcessingException {
+    public CompletableFuture<SendResult<String, String>> placeOrder(OrderRequest orderRequest) throws JsonProcessingException {
         Order order = new Order();
         order.setOrderNumber(UUID.randomUUID().toString());
 
@@ -175,11 +189,11 @@ public class OrderService {
 
             String value = objectMapper.writeValueAsString(orderPlacedEvent);
             log.info("value: {}", value);
-            ProducerRecord<Integer, String> producerRecord = buildProducerRecord(topic, key, value);
+            ProducerRecord<String, String> producerRecord = buildProducerRecord(topic, key, value);
             // xử lý k đồng bộ
             // mặc dù log ở controller là sau nhưng nó sẽ k chờ gọi pass hay failed nó vẫn chạy controller trc
             // gửi fail hay success thì nó sẽ in mess sau đó
-            CompletableFuture<SendResult<Integer, String>> completableFuture = kafkaTemplate.send(producerRecord);
+            CompletableFuture<SendResult<String, String>> completableFuture = kafkaTemplate.send(producerRecord);
 
             return completableFuture.whenComplete((sendResult, throwable) -> {
                 if (throwable != null) {
@@ -195,10 +209,10 @@ public class OrderService {
 
     }
 
-    private ProducerRecord<Integer, String> buildProducerRecord(String topic, Integer key, String value) {
+    private ProducerRecord<String, String> buildProducerRecord(String topic, Integer key, String value) {
         List<Header> recordHeaders = List.of(new RecordHeader("event-source", "scanner".getBytes()));
 
-        return new ProducerRecord<>(topic, null, key, value, recordHeaders);
+        return new ProducerRecord<>(topic, value);
     }
 
     private OrderLine mapToDto(OrderLineItemsDto orderLineItemsDto) {
